@@ -36,7 +36,7 @@ HERO_COLOR = {
 'THOR' : 'lightblue'
 }
 
-#funzione per creare la rete in base al numero di eroi che si vogliono immettere
+#function to create the network based on the number of heroes you want to enter
 #return marvel_net, appto_df
 def def_net(n):
     topn_hero = edge_df.groupby(['hero'])[['comic']].count().sort_values(by=['comic'], ascending=False).head(n).index
@@ -70,9 +70,9 @@ def show_n_hero_network(network, a, n, all_net):
     pos_ = nx.spring_layout(marvel_net, seed=11)
     cent_ = nx.pagerank(marvel_net, weight='weight') # page rank of heroes based on their link with other heroes count value previously finded
     cent_top = sorted(cent_.items(), key=lambda item: item[1], reverse=True)[:1] # page rank top 1
-    #print("Top centered hero: ", cent_top) #SPIDERMAN NOW
+    #print("Top centered hero: ", cent_top)
 
-    ## For each edge, make an edge_trace, append to list
+    # For each edge, make an edge_trace, append to list
     edge_trace = []
     for edge in marvel_net.edges():    
         if marvel_net.edges()[edge]['weight'] > 0:
@@ -87,7 +87,7 @@ def show_n_hero_network(network, a, n, all_net):
     node_trace = go.Scatter(x=[], y=[], text=[], textposition="top center", textfont_size=10, mode='markers+text', hoverinfo='none',
                             marker=dict(color=[], size=[], line_width=[], line_color=[]))
 
-    ## For each node in network, get the position and size and add to the node_trace
+    # For each node in network, get the position and size and add to the node_trace
     for node in marvel_net.nodes():
         x, y = pos_[node]
         node_trace['x'] += tuple([x])
@@ -96,19 +96,19 @@ def show_n_hero_network(network, a, n, all_net):
         line_width = 2
         line_color = 'darkgray'
         name_text = ''
-        #if node == 'SCARLET WITCH': name_text = node
+        #if node == 'SCARLET WITCH': name_text = node 
         name_text = node
         
         if node in HERO_COLOR:
             color = HERO_COLOR[node] 
             line_color='black'
-            name_text = node #da rimuovere se si vogliono vedere sono i nomi dei colori selezionati
+            name_text = node
             
         if node in [v[0] for v in cent_top]:
              name_text = '<b>' + node + '</b>'
             
         node_trace['marker']['color'] += tuple([color])
-        node_trace['marker']['size'] += tuple([int(400*cent_[node])]) # node size is proportional to page rank <--- IMPORTANTE
+        node_trace['marker']['size'] += tuple([int(400*cent_[node])]) # node size is proportional to page rank
         node_trace['marker']['line_width'] += tuple([line_width])
         node_trace['marker']['line_color'] += tuple([line_color])
         node_trace['text'] += tuple([name_text])
@@ -228,12 +228,11 @@ def get_cent(network, a):
     return cent_df
 
 # prepare Data
-#to visualize the means on graphs
+# to visualize the means on graphs
 def iterate_mean_cent_visualization():
 
     mean_cent_df = pd.DataFrame(index=HERO_COLOR.keys())
     #for topn in [25, 50, 100, 200, 500]:
-    #da cambiare anche sotto nello scatter
     for topn in [25, 50]:
         mean_cent_df[f"mean_cent_{topn}"] = get_cent(def_net(topn)).loc[HERO_COLOR.keys(), :]['mean_cent']
         
@@ -281,15 +280,12 @@ def small_world_experiment():
 def finger_snap(n):
     topn = n
     top_hero = edge_df.groupby(['hero'])[['comic']].count().sort_values(by=['comic'], ascending=False).head(topn).index
-    top_hero = [h for i, h in enumerate(top_hero)] # after finger snap,   QUI DIVENTA UNA LISTA e prendo solo il nome dell'eroe
+    top_hero = [h for i, h in enumerate(top_hero)] # after finger snap
     #print(top_hero, '\n', len(top_hero))
     no_elements_to_delete = len(top_hero) // 2
     no_elements_to_keep = len(top_hero) - no_elements_to_delete
-    top_hero_reduct = set(random.sample(top_hero, no_elements_to_keep))  # the `if i in top_hero_reduct` on the next line would benefit from b being a set for large lists
-    top_hero_reduct = [i for i in top_hero if i in top_hero_reduct]  # you need this to restore the order
-    #print("\nlen top hero: ", len(top_hero))  # 10
-    #print("\n divided list:", b)       # [1, 2, 3, 4, 5, 8, 9, 10]
-    #print("\n len divided list:", len(b))  # 8
+    top_hero_reduct = set(random.sample(top_hero, no_elements_to_keep))  
+    top_hero_reduct = [i for i in top_hero if i in top_hero_reduct]  
 
     h1_ = []; h2_ = []; cnt_ = []
     for comb in list(itertools.combinations(top_hero_reduct, 2)):    
@@ -298,7 +294,6 @@ def finger_snap(n):
         cnt = len(temp1.intersection(temp2)) # Appear Together    
         h1_.append(comb[0]); h2_.append(comb[1]); cnt_.append(cnt)
     appto_df50 = pd.DataFrame({'H1':h1_, 'H2':h2_, 'COUNT':cnt_})
-    #all_appto['fs50'] = appto_df.copy()
 
 
     marvel_net50 = nx.Graph() 
@@ -306,7 +301,7 @@ def finger_snap(n):
         if row['COUNT'] > 0:
             marvel_net50.add_edge(row['H1'], row['H2'], weight=row['COUNT'])
 
-    return marvel_net50, appto_df50 #ritorna i risultati delle liste dimezzate
+    return marvel_net50, appto_df50 
 
 def k_core_k_component(net, n):
 
@@ -339,8 +334,8 @@ def k_core_k_component(net, n):
 def grouping_measures(net):
 
     #AVERAGE SHORTES PATH LENGTH AND  CLUSTERING
-    aspl = nx.average_shortest_path_length(net) # no weight <-- IMPORTANTE
-    aspl2 = nx.average_clustering(net) #                    <-- IMPORTANTE
+    aspl = nx.average_shortest_path_length(net) # no weight 
+    aspl2 = nx.average_clustering(net) #                    
     adgr = sum(dict(net.degree()).values())/float(len(net)) # no weight
     print("shortes path length: ", aspl)
     print("averege clustering: ", aspl2)
@@ -374,13 +369,6 @@ def grouping_measures(net):
     #ECCENTRICITY
     eccentricity = dict(nx.eccentricity(net))
     print("Eccentricity: ", eccentricity)
-    #max_ecc = int()
-
-    #for dict in eccentricity:
-        #if max(dict.values()) > max_ecc:
-            #max_ecc = max(dict.values())
-
-    #print("Max eccentricity: ", max_ecc)
 
     #NET DEGREE
     print("net degree: ", net.degree())
@@ -396,6 +384,7 @@ def show_iterate_graphs(all_net):
         print_bar_figure(centrality, n, all_net)
         k_core_k_component(net, n)
         grouping_measures(net)
+    # comment this below if you use finger snap
     #iterate_mean_cent_visualization()
 
 #------------------------------
